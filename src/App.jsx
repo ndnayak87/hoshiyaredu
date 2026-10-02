@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   admitCards,
   currentAffairs,
@@ -98,7 +98,37 @@ function Header({ page, setPage, query, setQuery }) {
   );
 }
 
-function Home({ setPage }) {
+function NewsModal({ n, onClose }) {
+  if (!n) return null;
+  return (
+    <div className="notify-overlay" onClick={onClose}>
+      <div className="news-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="row between">
+          <span><Badge tone="orange">{n.category}</Badge> <small>{n.date}</small></span>
+          <button className="icon-btn" onClick={onClose}>✕</button>
+        </div>
+        <h2>{n.title}</h2>
+        <p>{n.summary}</p>
+        {n.points && (
+          <>
+            <h3>📌 Exam Points</h3>
+            <ul>
+              {n.points.map((p, i) => (
+                <li key={i}>{p}</li>
+              ))}
+            </ul>
+          </>
+        )}
+        <div className="row">
+          <a className="btn small primary" href={n.link} target="_blank" rel="noreferrer">🔗 Official Source ↗</a>
+          <button className="btn small ghost" onClick={onClose}>← Back</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Home({ setPage, openNews }) {
   return (
     <>
       <section className="hero">
@@ -120,11 +150,12 @@ function Home({ setPage }) {
             </button>
           </div>
           <div className="hero-stats">
-            <div><b>500+</b><span>Free PDFs</span></div>
-            <div><b>10K+</b><span>MCQs</span></div>
+            <div><b>{studyMaterial.length}+</b><span>Study Notes</span></div>
+            <div><b>{gkQuestions.length}+</b><span>Quiz Questions</span></div>
             <div><b>Daily</b><span>Current Affairs</span></div>
             <div><b>7</b><span>Sections</span></div>
           </div>
+          <p className="coming">🔜 Coming Soon: Direct PDF Download • Video Classes</p>
         </div>
         <div className="hero-right">
           <div className="hero-card">
@@ -165,7 +196,7 @@ function Home({ setPage }) {
           <div className="cat-card quote">
             <span className="cat-icon">💡</span>
             <b>आज का सुविचार</b>
-            <p>“मेहनत इतनी खामोशी से करो कि सफलता शोर मचा दे।”</p>
+            <p>“खुद वो बदलाव बनिए जो आप दुनिया में देखना चाहते हैं।” — महात्मा गांधी</p>
           </div>
         </div>
       </section>
@@ -177,7 +208,7 @@ function Home({ setPage }) {
             {currentAffairs.slice(0, 4).map((n) => (
               <article key={n.id} className="news-item">
                 <div><Badge tone="orange">{n.category}</Badge> <small>{n.date}</small></div>
-                <b>{n.title}</b>
+                <button className="news-link" onClick={() => openNews(n)}><b>{n.title}</b></button>
                 <p>{n.summary}</p>
               </article>
             ))}
@@ -218,12 +249,13 @@ function Home({ setPage }) {
 }
 
 function Quiz() {
+  const list = useMemo(() => [...gkQuestions].reverse(), []);
   const [idx, setIdx] = useState(0);
   const [picked, setPicked] = useState(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
-  const q = gkQuestions[idx];
-  const total = gkQuestions.length;
+  const q = list[idx];
+  const total = list.length;
 
   const pick = (i) => {
     if (picked !== null) return;
@@ -283,6 +315,182 @@ function Quiz() {
   );
 }
 
+const MOCK_Q = 50;
+const MOCK_TIME = 600;
+
+function MockTest() {
+  const qs = useMemo(() => [...gkQuestions].reverse().slice(0, MOCK_Q), []);
+  const [stage, setStage] = useState("info");
+  const [cur, setCur] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [seen, setSeen] = useState({ 0: true });
+  const [marked, setMarked] = useState({});
+  const [timeLeft, setTimeLeft] = useState(MOCK_TIME);
+  const [result, setResult] = useState(null);
+  const dataRef = useRef({ answers: {} });
+  dataRef.current.answers = answers;
+
+  useEffect(() => {
+    if (stage !== "test") return;
+    if (timeLeft <= 0) {
+      finish(true);
+      return;
+    }
+    const t = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, timeLeft]);
+
+  const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const go = (i) => {
+    setCur(i);
+    setSeen((s) => ({ ...s, [i]: true }));
+  };
+  const pick = (o) => setAnswers((a) => ({ ...a, [cur]: o }));
+  const clearRes = () => setAnswers((a) => {
+    const n = { ...a };
+    delete n[cur];
+    return n;
+  });
+  const next = (mark) => {
+    if (mark) setMarked((m) => ({ ...m, [cur]: true }));
+    if (cur < qs.length - 1) go(cur + 1);
+  };
+
+  const finish = (auto) => {
+    const ans = dataRef.current.answers;
+    let correct = 0, attempt = 0;
+    qs.forEach((qq, i) => {
+      if (ans[i] !== undefined) {
+        attempt++;
+        if (ans[i] === qq.answer) correct++;
+      }
+    });
+    const wrong = attempt - correct;
+    const skipped = qs.length - attempt;
+    const pct = Math.round((correct / qs.length) * 100);
+    const usedSec = MOCK_TIME - timeLeft;
+    const total = 12480;
+    const noise = (correct * 7919 + attempt * 131) % 89;
+    const rank = Math.max(1, Math.round(total * Math.pow(1 - correct / qs.length, 1.4) + noise));
+    const grade = pct >= 90 ? "🏆 Topper Zone" : pct >= 75 ? "🌟 Excellent" : pct >= 60 ? "👍 Good" : pct >= 40 ? "📈 Average" : "📚 Needs Practice";
+    setResult({ correct, attempt, wrong, skipped, pct, usedSec, rank, grade, total, auto });
+    setStage("result");
+    window.scrollTo({ top: 0 });
+  };
+
+  const submit = () => {
+    if (window.confirm(`Submit करें? Attempted: ${Object.keys(answers).length}/${qs.length}`)) finish(false);
+  };
+  const restart = () => {
+    setStage("info");
+    setCur(0);
+    setAnswers({});
+    setSeen({ 0: true });
+    setMarked({});
+    setTimeLeft(MOCK_TIME);
+    setResult(null);
+  };
+  const status = (i) => (marked[i] ? "marked" : answers[i] !== undefined ? "done" : seen[i] ? "seen" : "todo");
+
+  if (stage === "info")
+    return (
+      <div className="quiz-box">
+        <h2>📝 SSC Pattern Mock Test</h2>
+        <div className="mock-meta">
+          <div><b>{qs.length}</b><span>Questions</span></div>
+          <div><b>10:00</b><span>Minutes</span></div>
+          <div><b>+1</b><span>Correct</span></div>
+          <div><b>0</b><span>Negative</span></div>
+        </div>
+        <ul className="mock-rules">
+          <li>⏱️ 10 minute me {qs.length} questions — timer खत्म होते ही auto-submit</li>
+          <li>✅ सही = +1, ❌ गलत = 0 (no negative)</li>
+          <li>🟣 Mark for Review — doubtful questions बाद me देखें</li>
+          <li>📊 Result me score, accuracy + practice rank milega</li>
+        </ul>
+        <button className="btn primary" onClick={() => { setStage("test"); window.scrollTo({ top: 0 }); }}>▶ Start Test</button>
+      </div>
+    );
+
+  if (stage === "result" && result)
+    return (
+      <div className="quiz-box">
+        <h2>🏆 Mock Test Result</h2>
+        <p className="score">{result.correct} / {qs.length}</p>
+        <p><b>{result.grade}</b> • {result.pct}% • ⏱️ {fmt(result.usedSec)} used{result.auto ? " (Auto Submit)" : ""}</p>
+        <div className="res-grid">
+          <div className="res green"><b>{result.correct}</b><span>सही ✓</span></div>
+          <div className="res red"><b>{result.wrong}</b><span>गलत ✗</span></div>
+          <div className="res blue"><b>{result.attempt}</b><span>Attempted</span></div>
+          <div className="res gray"><b>{result.skipped}</b><span>Skipped</span></div>
+        </div>
+        <div className="rank-box">
+          <span>🎖️ Practice Rank</span>
+          <b>#{result.rank.toLocaleString("en-IN")} / {result.total.toLocaleString("en-IN")}</b>
+          <small>Demo rank — real rank ke liye login system जल्द!</small>
+        </div>
+        <div className="row center">
+          <button className="btn primary" onClick={restart}>🔄 फिर से Test दो</button>
+        </div>
+        <h3>📝 Answer Review</h3>
+        <div className="review-list">
+          {qs.map((qq, i) => {
+            const mine = dataRef.current.answers[i];
+            return (
+              <div key={i} className={`review-item ${mine === qq.answer ? "ok" : "bad"}`}>
+                <b>Q{i + 1}. {qq.q}</b>
+                <p>✅ सही: {qq.options[qq.answer]}</p>
+                {mine === undefined ? <p>⚪ आपने छोड़ा</p> : mine !== qq.answer ? <p>❌ आपका: {qq.options[mine]}</p> : <p>✓ आपका सही!</p>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+
+  const q = qs[cur];
+  return (
+    <div className="mock-wrap">
+      <div className="mock-main quiz-box">
+        <div className="mock-top">
+          <span>Q {cur + 1} / {qs.length}</span>
+          <span className={`timer ${timeLeft < 60 ? "danger" : ""}`}>⏱️ {fmt(timeLeft)}</span>
+        </div>
+        <div className="progress"><div style={{ width: `${(Object.keys(answers).length / qs.length) * 100}%` }} /></div>
+        <h3>{q.q}</h3>
+        <div className="opts">
+          {q.options.map((o, i) => (
+            <button key={i} className={`opt ${answers[cur] === i ? "picked" : ""}`} onClick={() => pick(i)}>
+              <span className="opt-letter">{["A", "B", "C", "D"][i]}</span> {o}
+            </button>
+          ))}
+        </div>
+        <div className="row">
+          <button className="btn small ghost" onClick={() => cur > 0 && go(cur - 1)}>← Prev</button>
+          <button className="btn small ghost" onClick={clearRes}>Clear</button>
+          <button className="btn small ghost" onClick={() => next(true)}>Mark & Next 🟣</button>
+          <button className="btn small primary" onClick={() => next(false)}>Save & Next →</button>
+        </div>
+      </div>
+      <div className="mock-side">
+        <div className="palette">
+          {qs.map((_, i) => (
+            <button key={i} className={`pal ${status(i)} ${cur === i ? "cur" : ""}`} onClick={() => go(i)}>{i + 1}</button>
+          ))}
+        </div>
+        <div className="legend">
+          <span><i className="dot done" /> Answered</span>
+          <span><i className="dot seen" /> Not Answered</span>
+          <span><i className="dot marked" /> Marked</span>
+          <span><i className="dot todo" /> Not Visited</span>
+        </div>
+        <button className="btn primary" onClick={submit}>Submit Test ✓</button>
+      </div>
+    </div>
+  );
+}
+
 function NotifyPrompt() {
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -329,6 +537,8 @@ export default function App() {
   const [page, setPage] = useState("home");
   const [query, setQuery] = useState("");
   const [catFilter, setCatFilter] = useState("All");
+  const [news, setNews] = useState(null);
+  const [gkTab, setGkTab] = useState("quiz");
 
   useEffect(() => {
     const meta = {
@@ -388,7 +598,7 @@ export default function App() {
           </section>
         )}
 
-        {(page === "home" || (q && false)) && <Home setPage={setPage} />}
+        {(page === "home" || (q && false)) && <Home setPage={setPage} openNews={setNews} />}
 
         {page === "current" && (
           <section>
@@ -402,7 +612,7 @@ export default function App() {
               {filteredNews.map((n) => (
                 <article key={n.id} className="card news">
                   <div className="row between"><Badge tone="orange">{n.category}</Badge><small>{n.date}</small></div>
-                  <h3><a className="news-link" href={n.link} target="_blank" rel="noreferrer">{n.title}</a></h3>
+                  <h3><button className="news-link" onClick={() => setNews(n)}>{n.title}</button></h3>
                   <p>{n.summary}</p>
                   <div className="row"><Badge>{n.tag}</Badge><span className="link">Exam Point ✓</span></div>
                 </article>
@@ -478,6 +688,11 @@ export default function App() {
         {page === "gk" && (
           <section>
             <h2 className="sec-title">🧠 GK & MCQ <small>Daily Practice Quiz</small></h2>
+            <div className="tabs">
+              <button className={gkTab === "quiz" ? "active" : ""} onClick={() => setGkTab("quiz")}>🧠 Daily Quiz</button>
+              <button className={gkTab === "mock" ? "active" : ""} onClick={() => setGkTab("mock")}>📝 Mock Test (50 Q • 10 Min)</button>
+            </div>
+            {gkTab === "quiz" ? (
             <div className="gk-wrap">
               <Quiz />
               <div className="gk-side">
@@ -500,6 +715,9 @@ export default function App() {
                 </div>
               </div>
             </div>
+            ) : (
+              <MockTest />
+            )}
           </section>
         )}
 
@@ -577,6 +795,7 @@ export default function App() {
         <div className="copy">© 2026 HoshiyarEdu • All Rights Reserved</div>
       </footer>
       <NotifyPrompt />
+      <NewsModal n={news} onClose={() => setNews(null)} />
     </div>
   );
 }

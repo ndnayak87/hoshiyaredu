@@ -49,7 +49,49 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .notify-box b { color: var(--navy); font-size: 18px; }
 .notify-box p { color: var(--muted); font-size: 14px; margin: 0; }
 .notify-bell { font-size: 44px; }
-.row.center { justify-content: center; }
+.tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.tabs button { border: 1px solid var(--border); background: #fff; border-radius: 999px; padding: 9px 18px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--navy); }
+.tabs button.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* Mock test */
+.mock-meta { display: flex; gap: 18px; flex-wrap: wrap; margin: 12px 0; }
+.mock-meta div { display: flex; flex-direction: column; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 8px 18px; }
+.mock-meta b { font-size: 20px; color: var(--navy); }
+.mock-meta span { font-size: 12px; color: var(--muted); }
+.mock-rules { font-size: 14px; padding-left: 20px; color: var(--text); margin: 0 0 14px; }
+.mock-rules li { padding: 3px 0; }
+.mock-wrap { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; }
+.mock-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: var(--navy); font-size: 15px; }
+.timer { background: #dcfce7; color: #15803d; padding: 5px 14px; border-radius: 999px; }
+.timer.danger { background: #fee2e2; color: #b91c1c; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .5; } }
+.opt.picked { background: #dbeafe; border-color: var(--blue); }
+.mock-side { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.pal { aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border); background: #f1f5f9; font-weight: 800; font-size: 13px; cursor: pointer; color: var(--text); }
+.pal.done { background: #16a34a; color: #fff; border-color: #16a34a; }
+.pal.seen { background: #ef4444; color: #fff; border-color: #ef4444; }
+.pal.marked { background: #8b5cf6; color: #fff; border-color: #8b5cf6; }
+.pal.cur { outline: 3px solid var(--navy); outline-offset: 1px; }
+.legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 4px; margin-right: 5px; }
+.dot.done { background: #16a34a; } .dot.seen { background: #ef4444; }
+.dot.marked { background: #8b5cf6; } .dot.todo { background: #cbd5e1; }
+.res-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+.res { border-radius: 12px; padding: 12px; display: flex; flex-direction: column; border: 1px solid var(--border); }
+.res b { font-size: 24px; } .res span { font-size: 12px; color: var(--muted); }
+.res.green { background: #dcfce7; } .res.green b { color: #15803d; }
+.res.red { background: #fee2e2; } .res.red b { color: #b91c1c; }
+.res.blue { background: #dbeafe; } .res.blue b { color: #1d4ed8; }
+.res.gray { background: #f1f5f9; } .res.gray b { color: var(--navy); }
+.rank-box { background: linear-gradient(135deg, #0f1f4b, #1e3a8a); color: #fff; border-radius: 14px; padding: 16px; text-align: center; display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.rank-box b { font-size: 26px; color: #fdba74; }
+.rank-box small { opacity: .7; font-size: 11.5px; }
+.review-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 480px; overflow-y: auto; }
+.review-item { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; }
+.review-item.ok { background: #f0fdf4; border-color: #86efac; }
+.review-item.bad { background: #fef2f2; border-color: #fca5a5; }
+.review-item p { margin: 2px 0; color: var(--muted); }
 
 .nav { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; padding: 0 12px 10px; max-width: 1200px; margin: 0 auto; }
 .nav button {
@@ -80,6 +122,7 @@ body { margin: 0; background: var(--bg); color: var(--text); }
 .hero-stats div { display: flex; flex-direction: column; }
 .hero-stats b { font-size: 20px; }
 .hero-stats span { font-size: 12px; color: #cbd5e1; }
+.coming { font-size: 13px !important; color: #fdba74 !important; margin-top: 10px !important; font-weight: 600; }
 .hero-right .hero-card { background: #fff; color: var(--text); border-radius: 16px; padding: 18px; }
 .hero-card h3 { margin: 0 0 8px; color: var(--navy); }
 .hero-card .big { font-size: 18px; font-weight: 800; color: #dc2626; }
@@ -116,6 +159,14 @@ a.link { text-decoration: none; }
 a.link:hover { text-decoration: underline; }
 .news-link { color: var(--navy); text-decoration: none; cursor: pointer; }
 .news-link:hover { color: var(--blue); text-decoration: underline; }
+button.news-link { background: none; border: 0; padding: 0; font: inherit; text-align: left; }
+.news-modal { background: #fff; border-radius: 18px; padding: 22px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.news-modal h2 { color: var(--navy); font-size: 20px; margin: 10px 0; }
+.news-modal p { font-size: 14.5px; color: var(--text); }
+.news-modal h3 { color: var(--navy); font-size: 15px; margin: 14px 0 6px; }
+.news-modal ul { font-size: 14px; padding-left: 20px; margin: 0 0 6px; }
+.news-modal ul li { padding: 3px 0; }
+.news-modal small { color: var(--muted); font-size: 12px; }
 
 .cat-card { border: 0; border-radius: 16px; padding: 18px; text-align: left; cursor: pointer; color: #fff; display: flex; flex-direction: column; gap: 6px; min-height: 150px; }
 .cat-card b { font-size: 16px; }
@@ -193,7 +244,7 @@ td small { display: block; color: var(--muted); font-size: 12px; }
   .hero { grid-template-columns: 1fr; padding: 22px; }
   .hero h1 { font-size: 28px; }
   .cards-4, .cards-3 { grid-template-columns: repeat(2, 1fr); }
-  .cards-2, .split, .gk-wrap { grid-template-columns: 1fr; }
+  .cards-2, .split, .gk-wrap, .mock-wrap { grid-template-columns: 1fr; }
   .foot-grid { grid-template-columns: 1fr 1fr; }
   .topbar-right { display: none; }
   .menu-btn { display: block; }
@@ -205,4 +256,5 @@ td small { display: block; color: var(--muted); font-size: 12px; }
 @media (max-width: 560px) {
   .cards-4, .cards-3 { grid-template-columns: 1fr; }
   .foot-grid { grid-template-columns: 1fr; }
+  .res-grid { grid-template-columns: repeat(2, 1fr); }
 }
