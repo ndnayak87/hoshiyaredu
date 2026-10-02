@@ -681,6 +681,64 @@ export const results = [
   { id: 6, exam: "NEET UG Counselling Round-2", declared: "27 Sep 2026", cutoff: "MCC Seat Allotment", status: "Declared", link: "https://mcc.nic.in" },
 ];
 
+export const centralExams = [
+  { id: 1, name: "UPSC CSE 2027", org: "Union Public Service Commission", detail: "~1056 posts • Prelims + Mains + Interview", link: "https://upsc.gov.in" },
+  { id: 2, name: "SSC CGL & GD", org: "Staff Selection Commission", detail: "CGL: Graduate • GD: 10वीं पास, 39,481 पद", link: "https://ssc.gov.in" },
+  { id: 3, name: "RRB NTPC & Group D", org: "Railway Recruitment Board", detail: "NTPC 11,558 पद • CBT-1 + CBT-2", link: "https://www.rrbapply.gov.in" },
+  { id: 4, name: "RRC Level-1", org: "Railway Recruitment Cell", detail: "10वीं/ITI • Zonal RRC भर्ती", link: "https://indianrailways.gov.in" },
+  { id: 5, name: "IBPS PO & Clerk", org: "Institute of Banking", detail: "PO 5,208 पद • Prelims + Mains", link: "https://www.ibps.in" },
+  { id: 6, name: "Agniveer (Army/Navy/Airforce)", org: "Indian Armed Forces", detail: "Agnipath • CEE + Physical + Medical", link: "https://joinindianarmy.nic.in" },
+  { id: 7, name: "CTET", org: "CBSE", detail: "Teaching Eligibility • 150 Marks • No Negative", link: "https://ctet.nic.in" },
+  { id: 8, name: "NEET UG 2027", org: "NTA", detail: "MBBS/BDS • 720 Marks • NCERT Based", link: "https://neet.nta.nic.in" },
+  { id: 9, name: "CUET UG 2027", org: "NTA", detail: "Central Universities • CBT Mode", link: "https://cuet.samarth.ac.in" },
+];
+
+export const stateExams = [
+  {
+    state: "Uttar Pradesh",
+    items: [
+      { name: "UP Police Constable", info: "19,220 पद • 12वीं पास", link: "https://uppbpb.gov.in" },
+      { name: "UPSSSC PET / Group C", info: "Prelims + Mains", link: "https://upsssc.gov.in" },
+      { name: "UPTET", info: "Teacher Eligibility", link: "https://updeled.gov.in" },
+    ],
+  },
+  {
+    state: "Bihar",
+    items: [
+      { name: "BPSC PCS", info: "Graduate • Prelims + Mains + Interview", link: "https://bpsc.bih.nic.in" },
+      { name: "Bihar Police Constable", info: "CSBC • 12वीं पास", link: "https://csbc.bih.nic.in" },
+    ],
+  },
+  {
+    state: "Madhya Pradesh",
+    items: [
+      { name: "MPPSC State Service", info: "Graduate • Prelims + Mains", link: "https://mppsc.mp.gov.in" },
+      { name: "MP Police / ESB Exams", info: "Constable • Group exams", link: "https://esb.mp.gov.in" },
+    ],
+  },
+  {
+    state: "Rajasthan",
+    items: [
+      { name: "RPSC RAS / RTS", info: "Graduate • Prelims + Mains", link: "https://rpsc.rajasthan.gov.in" },
+      { name: "Rajasthan Police", info: "Constable • 12वीं पास", link: "https://police.rajasthan.gov.in" },
+    ],
+  },
+  {
+    state: "Jharkhand",
+    items: [
+      { name: "JPSC Civil Services", info: "Graduate • Prelims + Mains", link: "https://jpsc.gov.in" },
+      { name: "JSSC Exams", info: "Group B/C posts", link: "https://jssc.nic.in" },
+    ],
+  },
+  {
+    state: "West Bengal",
+    items: [
+      { name: "WBPSC WBCS", info: "Graduate • Prelims + Mains", link: "https://wbpsc.gov.in" },
+      { name: "WB Police", info: "Constable / SI", link: "https://wbpolice.gov.in" },
+    ],
+  },
+];
+
 export const tickerItems = [
   "Gandhi Jayanti + Shastri Jayanti Special Quiz Live",
   "SSC GD Last Date नजदीक — 14 Oct 2026, जल्द Apply करें",

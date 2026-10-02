@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   admitCards,
+  centralExams,
   currentAffairs,
   exams,
   gkQuestions,
   jobs,
   results,
+  stateExams,
   studyMaterial,
   tickerItems,
 } from "./data";
@@ -491,6 +493,44 @@ function MockTest() {
   );
 }
 
+function MelaModal() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("he_mela")) return;
+    } catch { /* ignore */ }
+    const open = setTimeout(() => setShow(true), 3000);
+    return () => clearTimeout(open);
+  }, []);
+  useEffect(() => {
+    if (!show) return;
+    const close = setTimeout(() => {
+      setShow(false);
+      try { sessionStorage.setItem("he_mela", "1"); } catch { /* ignore */ }
+    }, 10000);
+    return () => clearTimeout(close);
+  }, [show]);
+  const hide = () => {
+    setShow(false);
+    try { sessionStorage.setItem("he_mela", "1"); } catch { /* ignore */ }
+  };
+  if (!show) return null;
+  return (
+    <div className="notify-overlay" onClick={hide}>
+      <div className="mela-poster" onClick={(e) => e.stopPropagation()}>
+        <button className="mela-x" onClick={hide}>✕</button>
+        <div className="mela-top">🎪 छत्तीसगढ़ शासन 🎪</div>
+        <h2>राज्य स्तरीय<br />रोजगार मेला</h2>
+        <div className="mela-date">📅 07 Oct – 08 Oct 2026</div>
+        <p className="mela-venue">📍 बलबीर सिंह जुनेजा इंडोर स्टेडियम,<br />बूढ़ापारा, रायपुर (छ.ग.)</p>
+        <p className="mela-info">रोजगार मेला में भाग हेतु <b>erojgar.cg.gov.in</b> पर “रोजगार इच्छुक लॉगिन” से ऑनलाइन आवेदन अनिवार्य है।</p>
+        <a className="btn primary" href="https://erojgar.cg.gov.in" target="_blank" rel="noreferrer">Online Apply ↗</a>
+        <div className="mela-bar"><div /></div>
+      </div>
+    </div>
+  );
+}
+
 function NotifyPrompt() {
   const [show, setShow] = useState(false);
   useEffect(() => {
@@ -539,6 +579,31 @@ export default function App() {
   const [catFilter, setCatFilter] = useState("All");
   const [news, setNews] = useState(null);
   const [gkTab, setGkTab] = useState("quiz");
+  const [examTab, setExamTab] = useState("central");
+  const firstLoad = useRef(true);
+
+  useEffect(() => {
+    const fromHash = () => {
+      const h = window.location.hash.replace("#/", "");
+      if (h === "mock") {
+        setPage("gk");
+        setGkTab("mock");
+        return;
+      }
+      if (PAGES.some((p) => p.id === h)) setPage(h);
+    };
+    fromHash();
+    window.addEventListener("hashchange", fromHash);
+    return () => window.removeEventListener("hashchange", fromHash);
+  }, []);
+  useEffect(() => {
+    const h = "#/" + (page === "gk" && gkTab === "mock" ? "mock" : page);
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+    if (window.location.hash !== h) window.location.hash = h;
+  }, [page, gkTab]);
 
   useEffect(() => {
     const meta = {
@@ -656,17 +721,40 @@ export default function App() {
 
         {page === "exams" && (
           <section>
-            <h2 className="sec-title">📝 Competitive Exams <small>Pattern + Syllabus</small></h2>
-            <div className="grid cards-3">
-              {filteredExams.map((e) => (
-                <article key={e.id} className="card">
-                  <Badge tone="blue">{e.date}</Badge>
-                  <h3>{e.name}</h3>
-                  <p><b>Pattern:</b> {e.pattern}</p>
-                  <p><b>Syllabus:</b> {e.syllabus}</p>
-                </article>
-              ))}
+            <h2 className="sec-title">📝 Competitive Exams <small>Central + State Govt</small></h2>
+            <div className="tabs">
+              <button className={examTab === "central" ? "active" : ""} onClick={() => setExamTab("central")}>🏛️ Central Govt</button>
+              <button className={examTab === "state" ? "active" : ""} onClick={() => setExamTab("state")}>🗺️ State Govt</button>
             </div>
+            {examTab === "central" ? (
+              <div className="grid cards-3">
+                {centralExams.filter((e) => match(e.name + e.org + e.detail)).map((e) => (
+                  <article key={e.id} className="card">
+                    <Badge tone="blue">{e.org}</Badge>
+                    <h3>{e.name}</h3>
+                    <p>{e.detail}</p>
+                    <div className="row">
+                      <a className="btn small primary" href={e.link} target="_blank" rel="noreferrer">Official Website ↗</a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="grid cards-2">
+                {stateExams.filter((s) => match(s.state + s.items.map((i) => i.name).join(" "))).map((s) => (
+                  <article key={s.state} className="card">
+                    <h3>📍 {s.state}</h3>
+                    {s.items.map((it) => (
+                      <div key={it.name} className="job-mini">
+                        <b>{it.name}</b>
+                        <p>{it.info}</p>
+                        <a className="link" href={it.link} target="_blank" rel="noreferrer">Official Website ↗</a>
+                      </div>
+                    ))}
+                  </article>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
@@ -795,6 +883,7 @@ export default function App() {
         <div className="copy">© 2026 HoshiyarEdu • All Rights Reserved</div>
       </footer>
       <NotifyPrompt />
+      <MelaModal />
       <NewsModal n={news} onClose={() => setNews(null)} />
     </div>
   );
